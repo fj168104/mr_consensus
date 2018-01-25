@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
+    <head>
+        <script type="text/javascript" th:src="@{https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js}"></script>
+        <link th:href="@{https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css}" rel="stylesheet"/>
+        <link th:href="@{/css/default.css}" rel="stylesheet"/>
+        <link rel="icon" th:href="@{/images/favicon.ico}" type="image/x-icon"/>
+        <meta charset="UTF-8"/>
+        <title>数据列表</title>
+    </head>
+
+    <body>
+
+        <div class="contentDiv">
+
+                <h1>  <strong style="color: olivedrab">微策金融與情搜索系统</strong></h1>
+
+
+            <!--<div align="center">-->
+                <!--<input id="query" type="text" class="input-medium search-query" value="">-->
+                <!--<a id = "button" class="btn btn-primary" href="/datas/search" role="button">Search</a>-->
+            <!--</div>-->
+
+            <div align="center">
+            <div class="input-group" style="width: 50%;">
+                <input id="query" type="text" class="form-control" value="">
+                <span id = "button" class="input-group-addon" role="button" style="color: dodgerblue"> 搜 索 </span>
+            </div>
+            </div>
+
+            <table class="table table-hover table-condensed">
+                <legend>
+                    <strong>数据列表</strong>
+                </legend>
+                <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>名称</th>
+                        <th>时间</th>
+                        <th>相关性</th>
+                        <th>详情</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="data : ${dataList}">
+                        <th scope="row" th:text="${data.id}"></th>
+                        <td th:text="${data.name}"></td>
+                        <td th:text="${data.issueDate}"></td>
+                        <td th:text="${data.score}"></td>
+                        <td><a th:href="${data.OriUrl}" th:text="明细" target="_blank" ></a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+
+    </body>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#button").click(function(){
+//                sHref = $("#button").attr("href") + "/" + $("#query").val();
+//                $("#button").attr("href", sHref);
+                href="/datas/search";
+                if($("#query").val().trim() == "") {
+                    alert("需要输入查询条件");
+                    $("#query").val("");
+                    href="";
+                }
+
+                sHref = href + "/" + $("#query").val();
+                window.location.replace(sHref);
+
+            });
+        });
+
+         </script>
+</html>
