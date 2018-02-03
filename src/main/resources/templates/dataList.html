@@ -39,6 +39,7 @@
                         <th>时间</th>
                         <th>相关性</th>
                         <th>详情</th>
+                        <th>报告</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,6 +49,7 @@
                         <td th:text="${data.issueDate}"></td>
                         <td th:text="${data.score}"></td>
                         <td><a th:href="${data.OriUrl}" th:text="明细" target="_blank" ></a></td>
+                        <td><a th:href="@{/downloadPDF/{dataId}(dataId=${data.id})}" th:text="下载" target="_blank" ></a></td>
                     </tr>
                 </tbody>
             </table>

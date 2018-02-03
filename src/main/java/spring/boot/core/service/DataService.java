@@ -1,6 +1,7 @@
 package spring.boot.core.service;
 
 
+import org.springframework.core.io.FileSystemResource;
 import spring.boot.core.domain.BankData;
 import spring.boot.core.domain.User;
 
@@ -16,4 +17,7 @@ public interface DataService {
 
     List<BankData> search(String sQuery) throws IOException;
 
+    FileSystemResource generatePDFFile(String sDataId) throws IOException;
+
+    public BankData createFMContent(String sDataId) throws IOException;
 }

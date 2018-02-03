@@ -2,6 +2,7 @@ package spring.boot.core.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -10,10 +11,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import spring.boot.core.domain.BankData;
 import spring.boot.core.service.DataService;
+import spring.boot.core.service.kit.ReportBankData;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Comparator;
@@ -21,12 +27,20 @@ import java.util.List;
 
 @Service
 public class DataServiceImpl implements DataService {
-	public static String URI = "http://localhost:9080/%s";
+	public static String SEARCH_URI = "http://localhost:9080/search/%s";
+	public static String QUERY_BY_ID_URI = "http://localhost:9080/id/%s";
+	public static String FM_BY_ID_URI = "http://localhost:8080/fetchFM/%s";
+
+	@Value("${fs.pdf.path}")
+	private String pdfPath;
+
+	@Autowired
+	private ReportBankData reportBankData;
 
 	private CloseableHttpClient client = HttpClients.createDefault();
 
 	public List<BankData> search(String sQuery) throws IOException {
-		String json = doGet(String.format(URI, sQuery));
+		String json = doGet(String.format(SEARCH_URI, sQuery));
 
 		/**
 		 * ObjectMapper支持从byte[]、File、InputStream、字符串等数据的JSON反序列化。
@@ -36,6 +50,39 @@ public class DataServiceImpl implements DataService {
 		});
 		beanList.sort(new BankDataComparator());
 		return beanList;
+	}
+
+	/**
+	 *
+	 * @param sDataId
+	 * @return
+	 */
+	public FileSystemResource generatePDFFile(String sDataId) throws IOException {
+		//创建PDF
+		createPDF(sDataId);
+
+		//输出至response
+		File file = FileUtils.getFile(String.format(pdfPath, sDataId));
+
+		return new FileSystemResource(file);
+	}
+
+	private void createPDF(String sDataId) throws IOException {
+		String fmHtml = doGet(String.format(FM_BY_ID_URI, sDataId));
+		reportBankData.createPDF(sDataId, fmHtml);
+	}
+
+	public BankData createFMContent(String sDataId) throws IOException {
+		//取得 BankData;
+		String json = doGet(String.format(QUERY_BY_ID_URI, sDataId));
+
+		/**
+		 * ObjectMapper支持从byte[]、File、InputStream、字符串等数据的JSON反序列化。
+		 */
+		ObjectMapper mapper = new ObjectMapper();
+		BankData bean = mapper.readValue(json, new TypeReference<BankData>() {
+		});
+		return bean;
 	}
 
 	private static class BankDataComparator implements Comparator<BankData> {
